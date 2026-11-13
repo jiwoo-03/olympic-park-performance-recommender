@@ -815,3 +815,54 @@ remote URL만 알려주면 나머지(`remote add`·`push`)는 git으로 진행 �
 **실행 승인 필요**(CLAUDE.md "모든 실행 작업은 승인 없이 임의로 실행하지 않는다"):
 1~4번(로컬, 되돌리기 쉬움)과 5~6번(GitHub에 올라가는 순간부터 되돌리기 어려움)을
 나눠서 승인받는 걸 추천 — 1~4번 먼저 진행하고 결과 확인 후 5~6번 진행.
+
+### 완료 기록 (2026-11-13, 1~4번)
+
+- [x] **1. `.gitignore` 수정**: `!data/processed/performances.csv`·
+      `!data/processed/performance_vectors.npz` 2줄 추가. 추가로(설계에 적어둔 사소한
+      제안) `.claude/settings.local.json`도 로컬 전용 권한 설정이라 `.gitignore`에 추가.
+- [x] **2. `git init`** — 프로젝트 루트에서 실행(`master` 브랜치로 생성됨, 아직 `main`으로
+      안 바꿈 — 5~6번에서 `git branch -M main` 예정).
+- [x] **3. 커밋 전 점검**: `git add -A` 후 `git status`로 스테이징 목록 확인 —
+      `.env`·`data/raw/*`·`*.db`·`performances_matched.json` 전부 안 들어온 것,
+      `data/processed/performances.csv`·`performance_vectors.npz`는 들어온 것 확인.
+      `.claude/settings.local.json`은 `git rm --cached`로 제외.
+- [x] **4. 첫 커밋**: `git commit`(해시 `cdbd722`, 89개 파일). 커밋 전 **git 계정 미설정**
+      문제 발견(`user.name`/`user.email` 없음) → 사용자 확인 후 전역(`--global`)으로
+      `user.name=jiwoo`, `user.email=jiwoo7914@gmail.com` 설정(사용자 직접 지정값,
+      CLAUDE.md "모든 실행 작업은 승인 필요" 원칙에 따라 git config 변경도 승인받고 진행).
+      커밋 후 `git status` clean 확인.
+
+**다음**: 5~6번(GitHub public repo 생성·remote 연결·push)은 `gh` CLI가 없어서 사용자가
+https://github.com/new 에서 직접 만들거나 remote URL을 알려주는 방식으로 진행 — 아직
+착수 안 함, 승인 대기.
+
+### 이메일 프라이버시 조정 (2026-11-13, 추가)
+
+public repo로 올라가면 커밋 작성자 이메일이 평문으로 영구 노출된다는 점을 사용자가
+확인 질문해서, push 전에 조정함:
+- **전역(`--global`) 설정은 그대로**(`user.name=jiwoo`, `user.email=jiwoo7914@gmail.com`)
+  — 이 컴퓨터의 다른(비공개) 저장소에는 영향 없음.
+- **이 저장소만 local로 override**: `git config user.email
+  "275266434+jiwoo-03@users.noreply.github.com"`(GitHub 계정 `jiwoo-03`의 공식
+  noreply 주소, 사용자가 GitHub Settings→Emails에서 직접 확인해 제공).
+- 이미 만든 첫 커밋(`cdbd722`)도 `git commit --amend --author=...`로 author/committer를
+  noreply 주소로 교체 → 새 해시 `acba987`. (`--amend`라 해시가 바뀌는 건 정상 — 아직
+  push 전이라 문제 없음.)
+
+### 완료 기록 (2026-11-13, 5~6번 — GitHub 연결·push)
+
+- [x] **5. GitHub repo 생성**: 사용자가 https://github.com/new 에서 직접 생성
+      (`jiwoo-03/olympic-park-performance-recommender`, public, README/.gitignore/
+      license 전부 미생성 — 로컬 히스토리와 충돌 방지).
+- [x] **6. 원격 연결·푸시**: `git remote add origin
+      https://github.com/jiwoo-03/olympic-park-performance-recommender.git` →
+      `git branch -M main`. **push 인증 이슈**: 이 샌드박스 환경은 GitHub 로그인
+      프롬프트(tty)를 못 띄워서(`fatal: could not read Username ... No such device
+      or address`) 내가 직접 push 못 함 → 사용자가 Personal Access Token(`repo` scope)을
+      발급해서 **본인 터미널에서 직접** `git push -u origin main` 실행(토큰은 채팅에
+      안 노출, 비밀번호 입력란에만 붙여넣음). 완료 후 `git fetch origin`+
+      `git branch -vv`로 `origin/main`이 로컬 `main`과 동일한 커밋(`acba987`)을
+      가리키는 것 확인 — **블로커 1·2 둘 다 완전히 해결**.
+- [x] **후속 커밋**: 이번 대화 중 기록 갱신분(`CLAUDE.md`·`tasks/todo.md`)을 2번째
+      커밋으로 추가 push.

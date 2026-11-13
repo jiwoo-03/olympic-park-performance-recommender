@@ -29,11 +29,13 @@ Precision@5 0.200→0.855) → `backend/`(FastAPI) → `frontend/`(Next.js)), �
 넘겼다(`tasks/verification.md` [2026-11-12]·[2026-11-13] 참고). 4.7장은 이걸로 사실상
 끝 — 남은 "사용성 테스트 5명"은 날짜·참가자가 아직 안 정해져서 사용자가 일정을 잡으면
 이어서 진행한다. **다음 작업은 4.8장(배포)**이고, 설계는 `tasks/todo.md` "8단계: 배포"에
-기록해뒀다 — **아직 실행은 안 함**. 핵심 선행 이슈 2가지: (1) 이 폴더가 **아직 git
-저장소가 아니다**(`git init`부터 필요), (2) `.gitignore`가 `data/processed/*`를
-전부 무시해서, 지금 그대로 배포하면 **백엔드가 서빙할 데이터가 없어 빈 화면만 뜬다**
-— `performances.csv`·`performance_vectors.npz`는 예외로 커밋해야 함. 둘 다 사용자
-확인·승인이 필요해서 아직 손 안 댔다.
+기록해뒀다. 핵심 선행 블로커 2가지 중 **로컬 부분은 2026-11-13에 해결 완료**: (1) 이
+폴더가 git 저장소가 아니던 문제 → `git init` 실행, 첫 커밋(`cdbd722`, 89개 파일) 완료
+(아직 `master` 브랜치, GitHub 원격 연결은 안 함 — public repo 생성·`remote add`·`push`
+남음, `gh` CLI 없어서 사용자가 repo를 직접 만들거나 URL을 주는 방식으로 진행 예정).
+(2) `.gitignore`가 `data/processed/*`를 전부 무시해서 배포하면 빈 화면만 뜨던 문제 →
+`performances.csv`·`performance_vectors.npz`를 예외로 추가해 커밋 완료. 상세 실행
+기록은 `tasks/todo.md` "8단계: 배포" "완료 기록 (2026-11-13, 1~4번)" 참고.
 폴더 구조는 `pipeline/`·`recommender/`·`backend/`·`frontend/` 전부 완료 상태다. 자세한
 역할은 아래 "폴더 구조" 참고.
 `올림픽공원_공연추천시스템_웹개발_워크플로우.md`는 **지금 우리가 진행할 목적과 계획이
