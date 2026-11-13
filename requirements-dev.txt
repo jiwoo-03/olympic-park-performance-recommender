@@ -1,0 +1,1 @@
+pytest  # 단위·통합 테스트. 배포 서버에는 설치 안 함(backend/requirements.txt에 안 넣음).
