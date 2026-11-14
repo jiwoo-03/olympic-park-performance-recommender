@@ -49,7 +49,17 @@ olympic-park-performance-recommender`, public) 연결·push까지 완료. (2) `.
 
 C(마무리) — Render `ALLOWED_ORIGIN`을 실제 Vercel 도메인으로 설정 → push 후 재배포되며
 반영 확인(허용 Origin만 CORS 통과, 그 외는 차단 확인). README에 실제 URL 반영.
-**다음 작업은 D단계(QR코드 생성)** — 승인 대기.
+D(QR코드 생성) — 손으로 짠 JS 인코더 대신 이 환경에 이미 설치돼 있던
+`libqrencode.so.4`(apt `libqrencode4`, 새 설치 없음)를 Python `ctypes`로 직접 호출해
+신뢰도 있는 QR을 생성(버전 4, 33×33), 시스템 `PIL`로 PNG 렌더링 후 육안 검증, 앱 브랜드
+토큰을 재사용한 Artifact 페이지로 제작·게시
+(https://claude.ai/code/artifact/1e15f486-59f7-44f8-b2bc-27e0ac06b169).
+
+**8단계(배포) 본작업 A~E 전부 완료(2026-11-14)**. 공개 URL: 백엔드
+`https://olympic-park-performance-recommender.onrender.com`, 프론트
+`https://olympic-park-performance-recommende.vercel.app`. 남은 건 발표 자료(사용자
+작업 영역)와 발표 당일 QR 실제 스캔 리허설(사용자가 직접 — 이 환경은 카메라로 스캔
+검증 불가)뿐.
 
 **디자인 다듬기(9단계, 진행 중, 2026-11-13~)**: 사용자가 올림픽공원 공식 심볼마크
 파일을 제공하며 시작. Artifact로 시안을 먼저 만들어 승인받은 뒤 단계적으로 반영 —
