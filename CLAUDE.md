@@ -38,13 +38,18 @@ olympic-park-performance-recommender`, public) 연결·push까지 완료. (2) `.
 "8단계: 배포" 참고. **배포 용도 재확인(2026-11-14)**: 공모전 심사 발표에서 QR코드로
 모바일 시연하는 용도로만 쓴다(상시 운영 서비스 아님) — 이에 맞춰 백엔드 호스팅
 **Render** 확정, GitHub Actions 매일 재수집 자동화는 이번엔 생략하기로 결정.
-**본작업 A단계(로컬 준비) 완료**: 출처 문구를 화면 footer에도 추가
-(`frontend/app/layout.tsx`), `backend/main.py` CORS를 `ALLOWED_ORIGIN` 환경변수
-기반으로 변경(Render 대시보드에서 코드 수정 없이 좁힐 수 있게), `backend/README.md`·
-루트 `README.md`에 Render Start Command·배포 URL 자리·설정값 문서화. 검증(빌드·린트·
-CORS 동작·백엔드 pytest 15건)은 `tasks/verification.md` [2026-11-14] 참고. **다음
-작업은 B단계**(Render/Vercel 외부 계정 생성·연결 — 사용자가 직접 해야 함) → 두 URL이
-나오면 C(CORS 좁히기·README 채우기)·D(QR코드 생성)로 마무리.
+**본작업 A·B·C단계 완료(2026-11-14)**: A(로컬 준비) — 출처 문구를 화면 footer에도
+추가(`frontend/app/layout.tsx`), `backend/main.py` CORS를 `ALLOWED_ORIGIN` 환경변수
+기반으로 변경, `backend/README.md`·루트 `README.md`에 Render Start Command·설정값
+문서화. B(외부 계정, 사용자 직접) — Render·Vercel 둘 다 실제 배포 완료:
+- 백엔드(Render): `https://olympic-park-performance-recommender.onrender.com`
+- 프론트(Vercel): `https://olympic-park-performance-recommende.vercel.app`
+  (Vercel이 처음 보여준 랜덤 해시 URL은 로그인 필요한 Preview였음 — Settings→Domains의
+  해시 없는 production 도메인을 써야 함, `tasks/verification.md` [2026-11-14] 참고)
+
+C(마무리) — Render `ALLOWED_ORIGIN`을 실제 Vercel 도메인으로 설정 → push 후 재배포되며
+반영 확인(허용 Origin만 CORS 통과, 그 외는 차단 확인). README에 실제 URL 반영.
+**다음 작업은 D단계(QR코드 생성)** — 승인 대기.
 
 **디자인 다듬기(9단계, 진행 중, 2026-11-13~)**: 사용자가 올림픽공원 공식 심볼마크
 파일을 제공하며 시작. Artifact로 시안을 먼저 만들어 승인받은 뒤 단계적으로 반영 —

@@ -571,3 +571,37 @@ WSL 로컬 환경 I/O 지연 영향을 받으므로 절대값보다 "회귀 없�
 
 **결론**: A단계(로컬 준비) 4개 항목 전부 구현·검증 완료, 회귀 없음. B단계(Render/Vercel
 외부 계정 작업)는 사용자가 직접 진행해야 함 — 다음 단계로 안내.
+
+## [2026-11-14] 8단계 배포 — B·C단계(실배포·CORS 좁히기) 검증
+
+사용자가 Render·Vercel 양쪽에 실제로 배포 완료. 확보된 URL:
+- 백엔드(Render): `https://olympic-park-performance-recommender.onrender.com`
+- 프론트(Vercel): `https://olympic-park-performance-recommende.vercel.app`
+
+1. **Render 배포 확인**: `curl GET /performances` → 200, 실제 공연 데이터(에픽하이
+   콘서트 등) 응답 확인.
+2. **Vercel URL 혼동 발견·정정**: 처음 전달받은 URL
+   (`...-fy7zmg2im.vercel.app`)은 `curl -L`로 추적한 결과
+   `vercel.com/login?next=...`로 리다이렉트 — Vercel Authentication이 걸린
+   **Preview 배포 URL**이었다(QR 시연용으로 쓰면 로그인 화면이 뜨는 치명적 문제가
+   될 뻔함). Vercel Settings → Domains에서 확인한 해시 없는 production 도메인
+   (`olympic-park-performance-recommende.vercel.app`)으로 재확인 → 200,
+   `<title>올림픽공원 공연 추천</title>` 정상.
+3. **push 전/후 비교로 배포 파이프라인 확인**: A+C 커밋을 push하기 전엔 Vercel
+   production 페이지에 footer 출처 문구가 없었음(예상된 결과 — 아직 구코드) →
+   push 후 재확인하니 "한국체육산업개발 공공데이터를 활용합니다." 문구가 실제로
+   나타남. Next.js 자동 재배포가 의도대로 동작함을 확인.
+4. **CORS 좁히기 반영 시차 확인**: push 직후 2회 polling(`access-control-allow-origin:
+   *`)까지는 Render가 아직 재배포 전이라 이전 값이었고, 3번째(약 30~45초 후)부터
+   `https://olympic-park-performance-recommende.vercel.app`로 좁혀짐을 확인(Render
+   pip install 포함 재빌드라 Vercel보다 느림 — 예상된 지연).
+5. **CORS 실제 차단 확인**: 허용 안 된 `Origin: https://evil-example.com`으로 요청 →
+   `access-control-allow-origin` 헤더 자체가 응답에 없음(차단 정상). 허용된 Vercel
+   Origin으로는 정확히 그 값이 echo됨.
+
+**환경 메모**: 이번에도 `git push`는 샌드박스가 GitHub 로그인 프롬프트(tty)를 못
+띄워서 실패(`fatal: could not read Username ... No such device or address`) —
+기존에 문서화된 환경 제약과 동일. 사용자가 본인 터미널에서 직접 push.
+
+**결론**: 공개 URL 2개 모두 정상 동작, CORS는 Vercel 도메인으로만 허용되도록 좁혀짐
+확인(치명 버그 없음). 다음은 D단계(QR코드 생성).

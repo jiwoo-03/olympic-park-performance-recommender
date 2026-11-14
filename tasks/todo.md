@@ -933,14 +933,21 @@ public repo로 올라가면 커밋 작성자 이메일이 평문으로 영구 �
    **A단계 커밋(footer 출처 문구)이 아직 push 전이라 지금은 footer가 안 보이는 게
    정상** — C에서 push 후 재확인 예정.
 
-#### C. 양쪽 URL 확인 후 마무리 (내가 실행, 승인 후) — 진행 중
+#### C. 양쪽 URL 확인 후 마무리 (내가 실행, 승인 후) — 완료 (2026-11-14)
 
-1. Render 대시보드의 `ALLOWED_ORIGIN` 환경변수를 B.2에서 나온 실제 Vercel production
-   도메인(`https://olympic-park-performance-recommende.vercel.app`)으로 설정하도록
-   안내(CORS 좁히기 — `backend/README.md`에 이미 메모해둔 과제) — 사용자 진행 중.
-2. `WebFetch`로 두 공개 URL이 실제로 응답하는지 확인(백엔드 `/performances`, 프론트 홈).
-3. 루트 `README.md`의 배포 URL placeholder를 실제 값으로 채워 커밋.
-4. `tasks/verification.md`에 배포 검증 결과 기록.
+1. [x] 사용자가 Render 대시보드에서 `ALLOWED_ORIGIN` 환경변수를 Vercel production
+   도메인(`https://olympic-park-performance-recommende.vercel.app`)으로 설정 →
+   push(A+C 커밋)로 Render가 재배포되며 반영됨(처음 2회는 재배포 전이라 `*`였고,
+   3번째 polling에서 좁혀진 값 확인 — 아래 4번 참고).
+2. [x] `curl`로 두 공개 URL 응답 확인 — 백엔드 `GET /performances` 200(실데이터),
+   프론트 홈 200 + footer 출처 문구 정상 노출.
+3. [x] 루트 `README.md`의 배포 URL placeholder를 실제 값으로 채워 커밋(`895582b`) →
+   사용자가 직접 `git push`(샌드박스는 GitHub 로그인 프롬프트를 못 띄워 push 불가 —
+   기존에 겪은 환경 제약과 동일).
+4. [x] CORS 좁히기 최종 확인: 허용된 Origin(Vercel URL)으로는
+   `access-control-allow-origin` 헤더가 정확히 그 값으로 오고, 허용 안 된 Origin
+   (`https://evil-example.com`)으로는 헤더 자체가 안 옴(차단 확인). 상세는
+   `tasks/verification.md` [2026-11-14] 참고.
 
 #### D. QR코드 생성 (최종 산출물, 내가 실행, 승인 후)
 
