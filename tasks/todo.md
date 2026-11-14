@@ -1108,3 +1108,40 @@ public repo로 올라가면 커밋 작성자 이메일이 평문으로 영구 �
 - **남은 것(사용자 작업)**: push 후 실제 모바일 브라우저(Android Chrome/iOS Safari)에서
       "홈 화면에 추가" 메뉴가 뜨는지 직접 확인 — 이 환경은 실기기 설치 UX까지는
       재현 불가.
+
+### 10-1. 요구사항 재확인 — "QR 찍으면 바로 설치" (2026-11-14, 사용자 수정 요청)
+
+사용자가 원한 건 "QR 찍으면 홈 화면에 추가하는 **법을 안내**받는 것"이 아니라
+"QR 찍으면 **사이트 자체에서 바로 설치 버튼**이 보이는 것" — 더 가까운 경험을
+요청해서 작업을 다시 설계·구현함.
+
+**플랫폼 한계 확인(계획 단계에서 사용자에게 먼저 설명·동의받음)**:
+- Android(Chrome 계열): `beforeinstallprompt` API로 버튼 한 번에 설치 가능 — 구현.
+- iOS(Safari): Apple이 설치를 트리거하는 API 자체를 안 줘서 "공유 → 홈 화면에 추가"
+  수동 안내만 가능 — 기술로 못 우회하는 플랫폼 제약, 버튼 대신 안내 배너로 유지.
+- 네이티브 앱(APK)은 이전에 이미 범위 밖으로 뺀 선택지라 유지(앱스토어 심사·서명
+  필요, 공모전 시연 일정과 안 맞음).
+
+- [x] `frontend/components/InstallPrompt.tsx` 신규(클라이언트 컴포넌트) — 홈 화면
+      맨 위에 배치(`app/page.tsx`). 이미 설치된 상태(`display-mode: standalone`)면
+      아무것도 안 보여줌.
+      - Android/Chrome 계열: `beforeinstallprompt` 이벤트를 가로채 "앱 설치하기"
+        버튼을 바로 노출 → 클릭 시 `prompt()` 호출.
+      - iOS Safari: 버튼 대신 "공유 버튼 → 홈 화면에 추가" 안내 배너.
+      - 닫기(✕) 누르면 `sessionStorage`로 같은 세션 동안 다시 안 뜸.
+- [x] **lint 수정**: effect 안에서 초기 상태를 바로 `setState`하면 Next.js 16의
+      `set-state-in-effect` 규칙 위반(6단계 때도 겪은 동일 규칙) → `dismissed`·
+      `showIosHint`를 lazy `useState` 초기화 함수로 바꿔서 해결(effect는
+      `beforeinstallprompt` 구독만 담당).
+- [x] **검증**: `npm run build`·`npm run lint` 통과. 실제 `next start` 서버 +
+      Playwright Chromium으로 3가지 시나리오 스크린샷·동작 확인 —
+      (1) 일반 데스크톱 UA·이벤트 없음 → 배너 없음(정상),
+      (2) iOS UA → "공유 버튼..." 배너 노출, 닫기 후 새로고침해도 다시 안 뜸(세션 유지),
+      (3) Android UA + 가짜 `beforeinstallprompt` 이벤트(실제 이벤트는 Chrome
+      설치 가능성 휴리스틱을 통과해야만 발생해서 자동화로 트리거 불가 — 같은 모양의
+      `prompt()`/`userChoice`를 가진 이벤트로 리스너·버튼 로직만 검증) → "앱 설치하기"
+      버튼 노출, 클릭 시 `prompt()` 호출 확인, 설치 후 버튼 사라짐.
+- [x] QR 안내 페이지(Artifact) 문구를 "접속 후 메뉴에서 찾아서 추가하세요"에서
+      "접속하면 버튼이 바로 떠요"로 수정·재게시.
+- **남은 것(사용자 작업)**: 실제 `beforeinstallprompt` 발생 여부·설치 후 UX는
+  실기기(Android Chrome)에서만 최종 확인 가능 — 이 환경은 재현 불가.

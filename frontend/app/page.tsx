@@ -6,6 +6,7 @@ import { getSessionId } from "@/lib/session";
 import type { Performance } from "@/lib/types";
 import PerformanceCalendar from "@/components/PerformanceCalendar";
 import PerformanceCard from "@/components/PerformanceCard";
+import InstallPrompt from "@/components/InstallPrompt";
 
 const GENRES = ["콘서트", "뮤지컬", "클래식", "페스티벌", "어린이", "스포츠/기타"];
 
@@ -57,6 +58,8 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-8 py-4">
+      <InstallPrompt />
+
       <Section
         title="예매 가능한 공연"
         items={myRecs}
