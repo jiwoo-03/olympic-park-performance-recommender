@@ -1,0 +1,18 @@
+name: keep-backend-awake
+
+# Render 무료 플랜 백엔드는 15분 동안 요청이 없으면 슬립 상태가 되고, 깨는 첫 요청이
+# 30~50초가량 걸린다. 제출용 QR은 심사위원이 언제 스캔할지 모르는데 미리 깨워줄 수
+# 없으므로, 슬립 임계치(15분)보다 짧은 주기로 핑을 보내 상시 깨어있게 유지한다.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: |
+          curl -sS -m 30 -o /dev/null -w "status=%{http_code} time=%{time_total}s\n" \
+            "https://olympic-park-performance-recommender.onrender.com/performances"
