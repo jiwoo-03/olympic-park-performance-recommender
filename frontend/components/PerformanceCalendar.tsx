@@ -12,15 +12,18 @@ const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
  * 우리는 모바일 우선(최대 너비 ~390px)이라 칸에 텍스트를 넣으면 안 보여서, 장르별
  * 색점(최대 3개+더보기 숫자)으로 축약하고 날짜를 누르면 아래에 전체 목록이 펼쳐지는
  * 방식으로 조정했다. */
+/* 올림픽공원 심볼마크 팔레트 기반. "스포츠/기타"만 다른 장르와 다르게 중립(stone)
+ * 색을 쓰는데, 이 버킷은 추천 로직(vectorize.NO_GENRE_SIGNAL)에서도 실제로 장르
+ * 신호를 안 주는 잡동사니 카테고리라서 — 비주얼이 실제 시스템 동작을 반영한다. */
 const GENRE_COLORS: Record<string, string> = {
-  "콘서트": "bg-rose-500",
-  "뮤지컬": "bg-violet-500",
-  "클래식": "bg-amber-500",
-  "페스티벌": "bg-sky-500",
-  "어린이": "bg-emerald-500",
-  "스포츠/기타": "bg-slate-500",
+  "콘서트": "bg-brand-fill",
+  "뮤지컬": "bg-teal-fill",
+  "클래식": "bg-sky-fill",
+  "페스티벌": "bg-lime",
+  "어린이": "bg-amber-fill",
+  "스포츠/기타": "bg-stone",
 };
-const DEFAULT_DOT_COLOR = "bg-gray-400";
+const DEFAULT_DOT_COLOR = "bg-stone";
 const MAX_DOTS = 3;
 
 function sameDay(a: Date, b: Date): boolean {
@@ -95,7 +98,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
         <button
           type="button"
           onClick={goPrevMonth}
-          className="rounded-lg border border-black/15 px-2 py-1 text-sm dark:border-white/15"
+          className="rounded-lg border border-line px-2 py-1 text-sm"
           aria-label="이전 달"
         >
           ◀
@@ -106,7 +109,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
         <button
           type="button"
           onClick={goNextMonth}
-          className="rounded-lg border border-black/15 px-2 py-1 text-sm dark:border-white/15"
+          className="rounded-lg border border-line px-2 py-1 text-sm"
           aria-label="다음 달"
         >
           ▶
@@ -115,7 +118,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
 
       {/* 데이터 로딩 전엔 비어있지만 min-h로 자리를 미리 잡아둬서, 장르가 채워질 때
        * 아래 달력 전체가 밀리지 않게 한다(Lighthouse CLS 점검에서 발견, 2026-11-12). */}
-      <div className="flex min-h-[1lh] flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+      <div className="flex min-h-[1lh] flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted">
         {genresInView.map((g) => (
           <span key={g} className="flex items-center gap-1">
             <span className={`h-1.5 w-1.5 rounded-full ${GENRE_COLORS[g] ?? DEFAULT_DOT_COLOR}`} />
@@ -131,7 +134,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
               <th
                 key={w}
                 className={`pb-1 font-medium ${
-                  i === 0 ? "text-rose-600" : i === 6 ? "text-sky-700" : "text-gray-500 dark:text-gray-400"
+                  i === 0 ? "text-sunday" : i === 6 ? "text-saturday" : "text-muted"
                 }`}
               >
                 {w}
@@ -147,7 +150,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
                 const dayPerformances = performancesFor(day);
                 const isSelected = selectedDay && sameDay(day, selectedDay);
                 const isToday = sameDay(day, today);
-                const weekendClass = j === 0 ? "text-rose-600" : j === 6 ? "text-sky-700" : "";
+                const weekendClass = j === 0 ? "text-sunday" : j === 6 ? "text-saturday" : "";
                 return (
                   <td key={j} className="py-1">
                     <button
@@ -156,11 +159,14 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
                       disabled={dayPerformances.length === 0}
                       className={`flex w-full flex-col items-center gap-1 rounded-lg py-1.5 ${
                         isSelected
-                          ? "bg-black text-white dark:bg-white dark:text-black"
+                          // bg-background가 라이트에선 밝은 값·다크에선 어두운 값이라,
+                          // brand 배경(라이트=진한 초록/다크=밝은 초록) 위에서 항상
+                          // 반대로 걸려 두 테마 모두 대비가 맞는다.
+                          ? "bg-brand text-background"
                           : dayPerformances.length > 0
-                            ? `hover:bg-black/5 dark:hover:bg-white/10 ${weekendClass}`
-                            : `text-gray-300 dark:text-gray-700 ${isToday ? "" : weekendClass}`
-                      } ${isToday && !isSelected ? "font-bold ring-1 ring-emerald-500" : ""}`}
+                            ? `hover:bg-surface-2 ${weekendClass}`
+                            : `text-muted opacity-50 ${isToday ? "" : weekendClass}`
+                      } ${isToday && !isSelected ? "font-bold ring-1 ring-brand" : ""}`}
                     >
                       <span>{day.getDate()}</span>
                       {/* 항상 h-1.5 높이를 차지해서(점이 없어도) 데이터 로딩 전/후로
@@ -170,7 +176,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
                           <span
                             key={p.id}
                             className={`h-1.5 w-1.5 rounded-full ${
-                              isSelected ? "bg-white dark:bg-black" : (GENRE_COLORS[p.genre] ?? DEFAULT_DOT_COLOR)
+                              isSelected ? "bg-background" : (GENRE_COLORS[p.genre] ?? DEFAULT_DOT_COLOR)
                             }`}
                           />
                         ))}
@@ -189,7 +195,7 @@ export default function PerformanceCalendar({ performances }: { performances: Pe
 
       {selectedDay && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400">
+          <h3 className="text-xs font-bold text-muted">
             {selectedDay.getMonth() + 1}월 {selectedDay.getDate()}일 공연 {selectedPerformances.length}건
           </h3>
           {selectedPerformances.map((p) => (

@@ -3,7 +3,7 @@ import type { PerformanceStatus } from "@/lib/types";
 const STYLES: Record<PerformanceStatus, string> = {
   "확정 예정": "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300",
   "매년 반복 예상": "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
-  "과거 유사 공연 — 참고용": "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+  "과거 유사 공연 — 참고용": "bg-surface-2 text-muted",
 };
 
 const HELP: Record<PerformanceStatus, string> = {

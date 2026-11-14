@@ -24,9 +24,9 @@ function Section({
     <section className="flex flex-col gap-2">
       <h2 className="text-sm font-bold">{title}</h2>
       {loading ? (
-        <p className="text-sm text-gray-500">불러오는 중...</p>
+        <p className="text-sm text-muted">불러오는 중...</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-gray-500">{emptyText}</p>
+        <p className="text-sm text-muted">{emptyText}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((p) => (
@@ -64,14 +64,14 @@ export default function HomePage() {
         emptyText="지금 예매 가능한 공연이 없어요."
       />
 
-      <section className="flex flex-col gap-3 border-t border-black/10 pt-6 dark:border-white/10">
+      <section className="flex flex-col gap-3 border-t border-line pt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold">날짜로 찾기</h2>
           <select
             aria-label="장르 필터"
             value={calendarGenre}
             onChange={(e) => setCalendarGenre(e.target.value)}
-            className="rounded-lg border border-black/15 px-2 py-1 text-xs dark:border-white/15 dark:bg-black"
+            className="rounded-lg border border-line bg-surface px-2 py-1 text-xs"
           >
             <option value="">장르 전체</option>
             {GENRES.map((g) => (
