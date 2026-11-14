@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +17,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "올림픽공원 공연 추천",
   description: "올림픽공원 공연을 취향·날짜에 맞춰 추천합니다.",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#237034",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -45,6 +53,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <footer className="border-t border-line px-4 py-3 text-center text-xs text-muted">
           본 서비스는 한국체육산업개발 공공데이터를 활용합니다.
         </footer>
+        <Script id="sw-register" strategy="afterInteractive">
+          {`if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js').catch(function () {}); }`}
+        </Script>
       </body>
     </html>
   );

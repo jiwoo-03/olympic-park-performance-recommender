@@ -669,3 +669,41 @@ WSL 로컬 환경 I/O 지연 영향을 받으므로 절대값보다 "회귀 없�
 **결론**: 치명 버그(배포 사이트 핵심 브랜드 요소 깨짐) 1건 발견·수정·배포까지 완료.
 교훈은 아래 "배포 전 로컬 미커밋 파일 점검" 패턴으로 `tasks/lessons.md`에도 남길 것
 (9단계처럼 "로컬에선 완성됐지만 git엔 없는" 작업이 배포 직전에 조용히 터질 수 있음).
+
+## [2026-11-14] 10단계 PWA(홈 화면 설치) 검증
+
+대상: `frontend/app/manifest.ts`, `frontend/public/sw.js`, `frontend/public/icons/*`,
+`frontend/app/layout.tsx`(viewport/아이콘 메타데이터·서비스워커 등록).
+
+1. **빌드**: `npm run build` → 라우트 목록에 `/manifest.webmanifest` 자동 생성 확인,
+   에러 없음. `npm run lint` 경고·에러 0건.
+2. **프로덕션 서버로 HTTP 레벨 실제 검증**(`next start -p 3100` 후 `curl`):
+   - `GET /manifest.webmanifest` → 유효한 JSON, `name`·`icons`(3개, any 2 + maskable 1)·
+     `display: "standalone"`·`theme_color`·`start_url` 전부 포함.
+   - `GET /sw.js` → 200, `Content-Type: application/javascript`.
+   - `GET /icons/icon-192.png`·`icon-512.png`·`icon-512-maskable.png`·
+     `apple-touch-icon.png` → 전부 200, `image/png`.
+   - `GET /`의 `<head>`에 `<link rel="manifest">`·`<meta name="theme-color"
+     content="#237034">`·`<link rel="apple-touch-icon">` 전부 실제로 주입됨 확인.
+3. **아이콘 육안 확인**: `icon-512.png`·`icon-512-maskable.png`를 `Read`로 직접 열어
+   확인 — 로고가 잘리지 않고 중앙에 깨끗하게 배치됨(maskable은 원형 마스크에도 안전할
+   정도의 여백 확보).
+4. **Lighthouse PWA 감사 시도·한계 발견**: `--only-categories=pwa` → "unrecognized
+   category" 에러로 실행 자체가 거부됨. 설치된 Lighthouse 13.6.0의 config 파일을
+   직접 뒤져봐도(`grep -rl "installable-manifest" .../lighthouse/core/config`)
+   관련 감사가 전혀 없음 — Lighthouse가 PWA 카테고리를 완전히 제거한 버전이라
+   **이 도구로는 검증 불가**(7단계 때 썼던 Lighthouse와 동일 설치본이지만 그때는
+   PWA 카테고리를 안 썼어서 몰랐던 한계). 대신 2~3번의 수동 HTTP 검증으로 Lighthouse가
+   확인했을 법한 조건(매니페스트 유효성·서비스워커 존재·아이콘 크기/목적)을 동일하게
+   커버.
+5. **의도적 한계 — 오프라인 캐싱 없음**: `sw.js`는 설치 조건만 충족하고 실제 요청을
+   가로채 캐싱하지 않음(`fetch` 리스너가 아무 것도 안 함 → 브라우저 기본 네트워크
+   동작 유지). 공연 데이터가 매일 배치로 바뀌는데 오래된 캐시를 보여주면 안 되기
+   때문 — 의도된 설계이지 버그가 아님.
+
+**한계**: 실제 Android Chrome/iOS Safari에서 "홈 화면에 추가" 메뉴가 실제로 뜨는지,
+설치 후 아이콘·전체화면이 의도대로 보이는지는 이 환경(카메라·실기기 없음)에서 직접
+재현 불가 — 사용자가 push 후 본인 폰으로 확인 필요.
+
+**결론**: 설치 가능 조건(매니페스트·아이콘·서비스워커·메타데이터)을 HTTP/콘텐츠
+레벨에서 전부 충족 확인. 실기기 설치 UX 확인만 남음.

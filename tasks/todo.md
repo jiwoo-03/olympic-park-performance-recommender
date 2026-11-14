@@ -1071,3 +1071,40 @@ public repo로 올라가면 커밋 작성자 이메일이 평문으로 영구 �
       고쳤는데 그대로"면 매번 이 절차부터).
 - [x] 실제 Chromium(Playwright)으로 라이트/다크 모드 둘 다 홈·상세 페이지 스크린샷 확인 —
       로고칩·브랜드 팔레트·그라데이션 포스터·달력 장르색·과거 배지 전부 의도대로 렌더링.
+
+## 10단계: PWA(홈 화면 설치) — 완료 (2026-11-14)
+
+**요청 배경**: QR로 링크를 받은 사람이 "앱을 다운로드해서 사용"할 수 있게 해달라는
+요청. 네이티브 앱(APK 등)은 앱스토어 심사·서명이 필요해 공모전 시연 일정엔 안
+맞아서, 사용자가 **PWA(홈 화면에 추가/설치)** 방식을 선택 — 지금 배포에 코드만
+추가하면 되고, 설치하면 주소창 없이 독립 아이콘·전체화면으로 뜬다.
+
+- [x] **아이콘 생성**: `frontend/public/olympic-park-mark.png`(256×264, 거의 정사각형)를
+      시스템에 이미 있던 `PIL`로 정사각 캔버스에 중앙 정렬해 4종 생성(새 설치 없음) —
+      `icons/icon-192.png`·`icon-512.png`(여백 18%, "any" 용도),
+      `icons/icon-512-maskable.png`(여백 45% — Android 적응형 아이콘이 원형으로 잘라도
+      안 잘리게 세이프존 확보), `icons/apple-touch-icon.png`(180×180, iOS 홈 화면용).
+- [x] **manifest**: `frontend/app/manifest.ts`(Next.js App Router 파일 컨벤션 —
+      `/manifest.webmanifest`로 자동 서빙 + `<head>`에 `<link rel="manifest">` 자동
+      삽입). `name`/`short_name`/`display: "standalone"`/`theme_color`(`#237034`,
+      브랜드 색)/아이콘 3종(any 2개 + maskable 1개) 포함.
+- [x] **서비스워커**: `frontend/public/sw.js` — 설치 가능 조건(fetch 핸들러 존재)만
+      충족하는 최소 구현, **오프라인 캐싱은 의도적으로 안 함**(공연 데이터는 매일
+      배치로 바뀌는데 캐싱하면 오래된 데이터를 보여줄 위험이 있어서). 등록은
+      `frontend/app/layout.tsx`에 `next/script`(`strategy="afterInteractive"`)로.
+- [x] **메타데이터**: `layout.tsx`에 `viewport.themeColor`, `metadata.icons.apple`
+      (apple-touch-icon 링크) 추가.
+- [x] **검증**: `npm run build`·`npm run lint` 통과(`/manifest.webmanifest` 라우트가
+      빌드 결과에 생성됨 확인) + 프로덕션 서버(`next start`) 띄워서 `curl`로
+      `/manifest.webmanifest`(JSON 파싱 가능)·`/sw.js`(200, JS MIME)·아이콘 4종(전부
+      200, PNG)·`<head>`의 `<link rel="manifest">`·`<meta name="theme-color">`·
+      `<link rel="apple-touch-icon">` 전부 실제로 주입되는 것 확인. Lighthouse의 PWA
+      전용 감사(`installable-manifest`·`service-worker`·`maskable-icon`)는 설치된
+      버전(13.6.0)에서 **PWA 카테고리 자체가 완전히 제거돼** 실행 불가 — 대신 위
+      HTTP 레벨 수동 검증으로 동일한 설치 조건(매니페스트 유효성·서비스워커 존재·
+      아이콘 크기/타입)을 확인. 상세는 `tasks/verification.md` [2026-11-14] 참고.
+- [x] QR 안내 페이지(Artifact)에 "앱처럼 설치하기"(홈 화면에 추가 방법) 안내 한 줄
+      추가·재게시.
+- **남은 것(사용자 작업)**: push 후 실제 모바일 브라우저(Android Chrome/iOS Safari)에서
+      "홈 화면에 추가" 메뉴가 뜨는지 직접 확인 — 이 환경은 실기기 설치 UX까지는
+      재현 불가.
