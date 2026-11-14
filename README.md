@@ -70,8 +70,8 @@ data/
 
 | | URL |
 | --- | --- |
-| 프론트엔드 (Vercel) | _(배포 후 채움)_ |
-| 백엔드 (Render) | _(배포 후 채움)_ |
+| 프론트엔드 (Vercel) | https://olympic-park-performance-recommende.vercel.app |
+| 백엔드 (Render) | https://olympic-park-performance-recommender.onrender.com |
 
 설정값:
 

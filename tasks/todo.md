@@ -914,20 +914,30 @@ public repo로 올라가면 커밋 작성자 이메일이 평문으로 영구 �
 - [x] 검증: `npm run build`·`npm run lint` 통과, `ALLOWED_ORIGIN` 설정 시 실제로 반영되는지
       TestClient로 확인, `backend/tests/` 15건 전부 통과(회귀 없음).
 - **다음**: B(Render/Vercel 외부 계정 작업)는 사용자가 직접 진행 — 승인 대기.
+- **push 시점 결정(2026-11-14)**: A단계 커밋(`81c96f1`)은 B단계가 끝날 때까지 로컬에만
+  두고, B 완료 후 C단계 변경분(CORS 좁히기·README URL 채우기)까지 합쳐서 한 번에
+  push하기로 함.
 
-#### B. 사용자가 외부 플랫폼에서 직접 해야 하는 작업 (내가 대신 못 함)
+#### B. 사용자가 외부 플랫폼에서 직접 해야 하는 작업 (내가 대신 못 함) — 완료
 
-1. **Render**: 계정 가입/로그인 → New Web Service → GitHub repo
-   (`jiwoo-03/olympic-park-performance-recommender`) 연결 → Root Directory: `backend`,
-   Build Command: `pip install -r requirements.txt`, Start Command: A.3의 커맨드 →
-   배포 → 생성된 URL(예: `https://xxx.onrender.com`)을 알려주기.
-2. **Vercel**: 계정 가입/로그인 → Import 같은 GitHub repo → Root Directory: `frontend`
-   → 환경변수 `NEXT_PUBLIC_API_BASE` = (1번 Render URL) → Deploy → 생성된 URL을 알려주기.
+1. [x] **Render**: `backend`를 Root Directory로 Web Service 생성 → 배포 URL
+   `https://olympic-park-performance-recommender.onrender.com` 확보. `curl`로
+   `GET /performances` 200 확인(실제 공연 데이터 응답, 2026-11-14).
+2. [x] **Vercel**: `frontend`를 Root Directory로 Import, 환경변수
+   `NEXT_PUBLIC_API_BASE`는 처음에 "Production and Preview"만 선택 가능해서(Development
+   제외 — 로컬은 기본값 `127.0.0.1:8000`을 쓰니 문제 없음) 그렇게 설정 → 배포 URL
+   `https://olympic-park-performance-recommende.vercel.app` 확보. **주의**: Vercel이
+   처음 보여준 랜덤 해시 붙은 URL(`...-fy7zmg2im.vercel.app`)은 Vercel SSO 로그인으로
+   리다이렉트되는 **Preview 배포 URL**이었음 — Settings → Domains의 해시 없는 production
+   도메인이 실제로 로그인 없이 공개되는 QR용 주소. `curl`로 200 확인, `<title>` 정상.
+   **A단계 커밋(footer 출처 문구)이 아직 push 전이라 지금은 footer가 안 보이는 게
+   정상** — C에서 push 후 재확인 예정.
 
-#### C. 양쪽 URL 확인 후 마무리 (내가 실행, 승인 후)
+#### C. 양쪽 URL 확인 후 마무리 (내가 실행, 승인 후) — 진행 중
 
-1. Render 대시보드의 `ALLOWED_ORIGIN` 환경변수를 B.2에서 나온 실제 Vercel URL로
-   설정하도록 안내(CORS 좁히기 — `backend/README.md`에 이미 메모해둔 과제).
+1. Render 대시보드의 `ALLOWED_ORIGIN` 환경변수를 B.2에서 나온 실제 Vercel production
+   도메인(`https://olympic-park-performance-recommende.vercel.app`)으로 설정하도록
+   안내(CORS 좁히기 — `backend/README.md`에 이미 메모해둔 과제) — 사용자 진행 중.
 2. `WebFetch`로 두 공개 URL이 실제로 응답하는지 확인(백엔드 `/performances`, 프론트 홈).
 3. 루트 `README.md`의 배포 URL placeholder를 실제 값으로 채워 커밋.
 4. `tasks/verification.md`에 배포 검증 결과 기록.
