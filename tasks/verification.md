@@ -636,3 +636,36 @@ WSL 로컬 환경 I/O 지연 영향을 받으므로 절대값보다 "회귀 없�
 
 **결론**: QR코드 생성 완료, 치명 버그 가능성 낮음(검증된 라이브러리 사용). 8단계
 배포 본작업(A~D) 전부 완료.
+
+## [2026-11-14] 배포 사이트 로고 404 버그 — 발견·수정·검증
+
+사용자가 QR로 실제 배포 사이트(Vercel)에 들어가 보고 "로고가 깨진다"고 보고
+(처음엔 QR 안내 페이지의 로고로 오해했으나, **QR은 정상이고 QR로 들어간 실제
+서비스 사이트의 앱바 로고가 깨진 것**으로 정정).
+
+1. **재현**: `curl -o /dev/null -w "%{http_code}"`로
+   `https://olympic-park-performance-recommende.vercel.app/olympic-park-mark.png`
+   요청 → **404** 확인.
+2. **원인**: `git log --oneline -1 -- frontend/public/olympic-park-mark.png` →
+   커밋 이력 없음(`?? frontend/public/olympic-park-mark.png`, 완전히 untracked).
+   `frontend/app/layout.tsx`(이미 커밋·배포된 코드)는 `/olympic-park-mark.png`를
+   무조건 참조하는데, 정작 그 파일은 9단계(디자인 다듬기) 작업 때 로컬에만 만들고
+   한 번도 git에 올린 적이 없었음 — Vercel 빌드에 파일 자체가 없어 404, 모든 기기에서
+   동일하게 깨짐(모바일/데스크톱 차이 아님).
+3. **범위 확인**: 같은 9단계 작업에 속한 `globals.css`(브랜드 팔레트)·
+   `page.tsx`·`performances/[id]/page.tsx`·`PerformanceCalendar.tsx`·
+   `PerformanceCard.tsx`·`StatusBadge.tsx`(팔레트 적용)·`posterGradient.ts`(신규)도
+   전부 같은 이유로 미커밋 상태였음 — 사용자 확인 후 로고 파일만이 아니라 9단계
+   전체를 함께 커밋하기로 결정(안 그러면 "로고는 있는데 나머지는 예전 회색 디자인"인
+   어중간한 상태가 됨).
+4. **수정 전 재검증**: `npm run build`·`npm run lint` 통과(이 8개 파일이 이미
+   작업 디렉터리에 적용된 상태로 빌드했으므로 실제 배포될 코드와 동일 조건).
+5. **커밋·배포 후 재확인**: push → Vercel 자동 재배포 → `/olympic-park-mark.png`
+   200(폴링 1회차에 바로 성공 — 빌드가 이미 끝나 있었던 것으로 보임), 홈페이지 HTML에
+   `olympic-park-mark.png` 참조와 출처 문구 둘 다 정상 노출 확인.
+6. **제외한 파일**: `recommender/olympicpark_pi_symbol.ai`·`.jpg`(심볼마크 원본
+   소스)는 코드 어디에서도 참조하지 않는 사용자의 참고 자료라 이번 커밋에서 제외.
+
+**결론**: 치명 버그(배포 사이트 핵심 브랜드 요소 깨짐) 1건 발견·수정·배포까지 완료.
+교훈은 아래 "배포 전 로컬 미커밋 파일 점검" 패턴으로 `tasks/lessons.md`에도 남길 것
+(9단계처럼 "로컬에선 완성됐지만 git엔 없는" 작업이 배포 직전에 조용히 터질 수 있음).
