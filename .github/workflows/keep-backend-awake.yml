@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping backend
+        # -m을 콜드 스타트 최악 시간(50초)보다 넉넉히 잡고, 혹시 모를 네트워크 일시
+        # 오류에 대비해 1회 재시도까지 둔다(2026-11-14: -m 30으로 처음 돌렸다가
+        # 완전히 잠든 상태에서 타임아웃으로 실패한 적이 있어 늘림).
         run: |
-          curl -sS -m 30 -o /dev/null -w "status=%{http_code} time=%{time_total}s\n" \
+          curl -sS -m 90 --retry 1 --retry-delay 5 -o /dev/null \
+            -w "status=%{http_code} time=%{time_total}s\n" \
             "https://olympic-park-performance-recommender.onrender.com/performances"
