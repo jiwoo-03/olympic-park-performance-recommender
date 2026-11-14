@@ -63,6 +63,23 @@ data/
    python run_all.py
    ```
 
+## 배포 (시연용)
+
+공모전 심사 발표에서 QR코드로 모바일 시연하는 용도로만 배포한다(상시 운영 서비스
+아님, `tasks/todo.md` "8단계" 참고).
+
+| | URL |
+| --- | --- |
+| 프론트엔드 (Vercel) | _(배포 후 채움)_ |
+| 백엔드 (Render) | _(배포 후 채움)_ |
+
+설정값:
+
+| 서비스 | Root Directory | 비고 |
+| --- | --- | --- |
+| Vercel (`frontend/`) | `frontend` | 환경변수 `NEXT_PUBLIC_API_BASE` = 백엔드 URL |
+| Render (`backend/`) | `backend` | 상세 설정은 [`backend/README.md`](./backend/README.md) "배포" 참고 |
+
 ## 기술 스택
 
 Python(FastAPI, pandas, KoNLPy, rapidfuzz) · scikit-learn/sentence-transformers/FAISS(추천) ·

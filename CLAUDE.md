@@ -25,17 +25,38 @@ Precision@5 0.200→0.855) → `backend/`(FastAPI) → `frontend/`(Next.js)), �
 `recommender/tests/`·`pipeline/preprocessing/tests/`·`backend/tests/`에 각각
 작성, 세 디렉터리 전부 독립 실행으로 통과 확인. Lighthouse는 레이아웃 밀림(CLS)
 2건·접근성 2건을 실제로 찾아 고쳤고(홈 Accessibility 89→100, CLS 전부 0), 보조
-텍스트 색상 대비 미달 1건은 앱 전체 디자인 토큰 문제라 디자인 다듬기 단계로
-넘겼다(`tasks/verification.md` [2026-11-12]·[2026-11-13] 참고). 4.7장은 이걸로 사실상
+텍스트 색상 대비 미달 1건은 당시엔 앱 전체 디자인 토큰 문제라 디자인 다듬기 단계로
+미뤘었는데 **2026-11-13에 해결 완료**(아래 "디자인 다듬기" 참고). 4.7장은 이걸로 사실상
 끝 — 남은 "사용성 테스트 5명"은 날짜·참가자가 아직 안 정해져서 사용자가 일정을 잡으면
-이어서 진행한다. **다음 작업은 4.8장(배포)**이고, 설계는 `tasks/todo.md` "8단계: 배포"에
-기록해뒀다. 핵심 선행 블로커 2가지 중 **로컬 부분은 2026-11-13에 해결 완료**: (1) 이
-폴더가 git 저장소가 아니던 문제 → `git init` 실행, 첫 커밋(`cdbd722`, 89개 파일) 완료
-(아직 `master` 브랜치, GitHub 원격 연결은 안 함 — public repo 생성·`remote add`·`push`
-남음, `gh` CLI 없어서 사용자가 repo를 직접 만들거나 URL을 주는 방식으로 진행 예정).
-(2) `.gitignore`가 `data/processed/*`를 전부 무시해서 배포하면 빈 화면만 뜨던 문제 →
-`performances.csv`·`performance_vectors.npz`를 예외로 추가해 커밋 완료. 상세 실행
-기록은 `tasks/todo.md` "8단계: 배포" "완료 기록 (2026-11-13, 1~4번)" 참고.
+이어서 진행한다.
+
+**8단계(배포) 선행 블로커 2가지는 2026-11-13에 전부 해결 완료**: (1) 이 폴더가 git
+저장소가 아니던 문제 → `git init` + GitHub 원격 저장소(`jiwoo-03/
+olympic-park-performance-recommender`, public) 연결·push까지 완료. (2) `.gitignore`가
+`data/processed/*`를 전부 무시해서 배포하면 빈 화면만 뜨던 문제 → `performances.csv`·
+`performance_vectors.npz`를 예외로 추가해 커밋 완료. 상세 실행 기록은 `tasks/todo.md`
+"8단계: 배포" 참고. **배포 용도 재확인(2026-11-14)**: 공모전 심사 발표에서 QR코드로
+모바일 시연하는 용도로만 쓴다(상시 운영 서비스 아님) — 이에 맞춰 백엔드 호스팅
+**Render** 확정, GitHub Actions 매일 재수집 자동화는 이번엔 생략하기로 결정.
+**본작업 A단계(로컬 준비) 완료**: 출처 문구를 화면 footer에도 추가
+(`frontend/app/layout.tsx`), `backend/main.py` CORS를 `ALLOWED_ORIGIN` 환경변수
+기반으로 변경(Render 대시보드에서 코드 수정 없이 좁힐 수 있게), `backend/README.md`·
+루트 `README.md`에 Render Start Command·배포 URL 자리·설정값 문서화. 검증(빌드·린트·
+CORS 동작·백엔드 pytest 15건)은 `tasks/verification.md` [2026-11-14] 참고. **다음
+작업은 B단계**(Render/Vercel 외부 계정 생성·연결 — 사용자가 직접 해야 함) → 두 URL이
+나오면 C(CORS 좁히기·README 채우기)·D(QR코드 생성)로 마무리.
+
+**디자인 다듬기(9단계, 진행 중, 2026-11-13~)**: 사용자가 올림픽공원 공식 심볼마크
+파일을 제공하며 시작. Artifact로 시안을 먼저 만들어 승인받은 뒤 단계적으로 반영 —
+(1) 포스터 없는 공연의 회색 빈 박스를 심볼마크 색 기반 그라데이션으로 교체
+(`frontend/lib/posterGradient.ts`), (2) 심볼마크 링 그래픽에서 실제 추출한 브랜드
+팔레트(`frontend/app/globals.css`의 `--brand`/`--teal`/`--sky`/`--lime`/`--amber`/
+`--stone` 등)로 기존 Tailwind 기본 회색·장르색을 전부 교체 — 이 과정에서 Lighthouse가
+찾아놓고 못 고쳤던 보조 텍스트 대비 미달 문제(`text-gray-400/500` 등)도 전부 WCAG AA
+(4.5:1) 검증된 `--muted`/`--stone` 토큰으로 교체해 해결, (3) 앱바에 심볼마크 로고칩
+추가(`frontend/public/olympic-park-mark.png`). 달력 주말 색상은 처음에 브랜드 팔레트로
+통일했다가 사용자 요청으로 "일요일=빨강/토요일=파랑" 관례를 복구(`--sunday`/`--saturday`
+전용 토큰, 브랜드 팔레트와 분리). 상세는 `tasks/todo.md` "9단계: 디자인 다듬기" 참고.
 폴더 구조는 `pipeline/`·`recommender/`·`backend/`·`frontend/` 전부 완료 상태다. 자세한
 역할은 아래 "폴더 구조" 참고.
 `올림픽공원_공연추천시스템_웹개발_워크플로우.md`는 **지금 우리가 진행할 목적과 계획이

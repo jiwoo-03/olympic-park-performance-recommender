@@ -8,6 +8,7 @@ API 핸들러는 임베딩 계산이나 외부 API 호출을 하지 않는다(CL
 """
 from __future__ import annotations
 
+import os
 from datetime import date
 
 import pandas as pd
@@ -22,11 +23,13 @@ import recommend as rec  # noqa: E402  (위 임포트가 경로를 추가한 뒤
 
 app = FastAPI(title="올림픽공원 공연 추천 API", version="0.1.0")
 
-# 프론트엔드(Next.js, 다른 포트/도메인)가 브라우저에서 바로 호출해야 하므로 CORS를 열어둔다.
-# 실제 배포 시에는 "*" 대신 Vercel 배포 도메인으로 좁혀야 한다.
+# 프론트엔드(Next.js, 다른 포트/도메인)가 브라우저에서 바로 호출해야 하므로 CORS가 필요하다.
+# 로컬 개발 기본값은 전체 허용("*")이고, 배포 환경에서는 Render 대시보드에 ALLOWED_ORIGIN
+# 환경변수(Vercel 배포 URL, 쉼표로 여러 개 가능)를 설정하면 코드 수정 없이 좁혀진다.
+_allowed_origin = os.environ.get("ALLOWED_ORIGIN", "*")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"] if _allowed_origin == "*" else _allowed_origin.split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )

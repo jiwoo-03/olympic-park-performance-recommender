@@ -24,10 +24,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-white text-gray-900 dark:bg-black dark:text-gray-100">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-black/10 bg-white/90 px-4 py-3 backdrop-blur dark:border-white/10 dark:bg-black/90">
-          <Link href="/" className="text-sm font-bold">
-            올림픽공원 공연 추천
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-surface/90 px-4 py-3 backdrop-blur">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/olympic-park-mark.png" alt="" width={28} height={28} className="h-6 w-6 object-contain" />
+            </span>
+            <span className="text-sm font-bold tracking-tight">올림픽공원 공연 추천</span>
           </Link>
           <nav className="flex gap-4 text-sm">
             <Link href="/" className="hover:underline">
@@ -38,6 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-4">
           {children}
         </main>
+        <footer className="border-t border-line px-4 py-3 text-center text-xs text-muted">
+          본 서비스는 한국체육산업개발 공공데이터를 활용합니다.
+        </footer>
       </body>
     </html>
   );

@@ -19,10 +19,11 @@ FastAPI 서버. 임베딩 계산이나 외부 API 호출은 여기 두지 않는
   "추가 수정 작업" 참고) — 지금 DB에 남은 테이블은 추천 노출 로그(`RecLog`)뿐이다.
 - **인증 없음**: 로그인 시스템을 만들었다가 사용 과정에서 다시 뺐다. 클라이언트가
   만든 익명 `session_id`로 추천 로그만 구분한다.
-- **CORS**: `CORSMiddleware`로 전부 허용(`allow_origins=["*"]`) — 프론트(다른 포트)가
+- **CORS**: `CORSMiddleware`로 기본 전부 허용(`allow_origins=["*"]`) — 프론트(다른 포트)가
   브라우저에서 바로 호출해야 하기 때문. `TestClient`로는 이 문제가 안 드러나서(CORS를
   검사 안 함), 실제 브라우저로 연동 테스트하다가 뒤늦게 발견했다(`tasks/verification.md`
-  [2026-11-12] 참고). **배포 시에는 `"*"` 대신 실제 프론트 도메인으로 좁혀야 한다.**
+  [2026-11-12] 참고). **배포 시에는 환경변수 `ALLOWED_ORIGIN`에 실제 Vercel 배포 URL을
+  넣으면(쉼표로 여러 개 가능) 코드 수정 없이 좁혀진다**(`main.py` 참고, 미설정 시 `"*"`).
 
 ## API
 
@@ -51,6 +52,20 @@ cd backend
 ../.venv/bin/python3 -m uvicorn main:app --reload
 # http://127.0.0.1:8000/docs 에서 Swagger로 확인
 ```
+
+## 배포 (Render)
+
+Render Web Service 생성 시 아래 값을 그대로 입력한다(`tasks/todo.md` "8단계" 참고):
+
+| 항목 | 값 |
+| --- | --- |
+| Root Directory | `backend` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| 환경변수 `ALLOWED_ORIGIN` (Vercel URL 확정 후 설정) | `https://<실제 Vercel 배포 도메인>` |
+
+Render 무료 티어는 일정 시간 요청이 없으면 슬립 상태가 되고, 깨는 첫 요청이
+30~50초가량 걸릴 수 있다 — 시연(QR코드 스캔) 직전에는 미리 한 번 접속해서 깨워둘 것.
 
 ## 테스트
 

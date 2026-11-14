@@ -552,3 +552,22 @@ Best Practices 77은 로컬 HTTP(비-HTTPS) 테스트 특성 + KOPIS 포스터�
 
 **결론**: 치명 버그 없음. CLS는 완전히 해결(0), 접근성은 홈 100/상세 96. 성능 점수는
 WSL 로컬 환경 I/O 지연 영향을 받으므로 절대값보다 "회귀 없음"에 의미를 둔다.
+
+## [2026-11-14] 8단계 배포 — A단계(로컬 준비) 검증
+
+대상: `frontend/app/layout.tsx`(출처 footer), `backend/main.py`(`ALLOWED_ORIGIN` CORS),
+`backend/README.md`·루트 `README.md`(배포 설정 문서화). 상세 설계는 `tasks/todo.md`
+"8단계: 배포 → 본작업 실행 계획 → A" 참고.
+
+1. **프론트 빌드·린트**: `npm run build` 성공(라우트 `/`·`/_not-found`·
+   `/performances/[id]` 전부 정상 생성), `npm run lint` 경고·에러 0건.
+2. **CORS 환경변수 동작 확인**: `ALLOWED_ORIGIN=https://example-demo.vercel.app`로
+   설정 후 `TestClient`로 `GET /performances` 호출 → 200, `main._allowed_origin`이
+   설정한 값으로 반영됨을 확인. 미설정 시 기존 동작(`"*"`)과 동일(코드상 폴백 확인).
+3. **백엔드 회귀 테스트**: `../.venv/bin/python3 -m pytest tests/` — 15건 전부 통과
+   (기존 `on_event` deprecation 경고는 이번 변경과 무관, 사전부터 있던 것).
+4. **접근성 재사용 확인**: footer에 쓴 `text-muted`는 9단계 디자인 다듬기에서 WCAG AA
+   (4.5:1) 검증을 이미 거친 토큰이라 별도 대비 재검증 안 함.
+
+**결론**: A단계(로컬 준비) 4개 항목 전부 구현·검증 완료, 회귀 없음. B단계(Render/Vercel
+외부 계정 작업)는 사용자가 직접 진행해야 함 — 다음 단계로 안내.
